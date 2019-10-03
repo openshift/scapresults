@@ -6,14 +6,21 @@ import base64
 import gzip
 
 import kubernetes
+from kubernetes.client.rest import ApiException
 
+# CRD definitions
+CRD_GROUP = "openscap.compliance.openshift.io"
+CRD_API_VERSION = "v1alpha1"
+CRD_PLURALS = "openscaps"
 
 def get_args():
     parser = argparse.ArgumentParser(description='Script watches for existence of a file'
                                                  'and then uploads it to a configMap')
-    parser.add_argument('--mode', dest='mode', choices=['incluster', 'outcluster', 'debug'], default='incluster')
     parser.add_argument(
         '--file', type=str, help='The file to watch', dest='filename',
+        default=None, required=True)
+    parser.add_argument(
+        '--owner', type=str, help='The openscap scan that owns the configMap objects', dest='scan_name',
         default=None, required=True)
     parser.add_argument(
         '--config-map-name', type=str, help='The configMap to upload to, typically the podname', dest='config_map',
@@ -27,18 +34,42 @@ def get_args():
     return parser.parse_args()
 
 
-def create_config_map(name, file_name, result_contents, compressed=False):
+def get_openscap_scan_instance(custom_api, scan_name, namespace):
+    try:
+        openscap_scan = custom_api.get_namespaced_custom_object(
+                CRD_GROUP,
+                CRD_API_VERSION,
+                namespace,
+                CRD_PLURALS,
+                scan_name)
+    except ApiException as e:
+        if e.status == 404:
+            return None
+        raise e
+    return openscap_scan
+
+
+def create_config_map(owner, name, file_name, result_contents, compressed=False):
     annotations = {}
     if compressed:
         annotations = {
             "openscap-scan-result/compressed": ""
         }
+
+    scan_reference = kubernetes.client.V1OwnerReference(
+        api_version=owner['apiVersion'],
+        kind=owner['kind'],
+        name=owner['metadata']['name'],
+        uid=owner['metadata']['uid'],
+    )
+
     return kubernetes.client.V1ConfigMap(
         api_version="v1",
         kind="ConfigMap",
         metadata=kubernetes.client.V1ObjectMeta(
             name=name,
-            annotations=annotations
+            annotations=annotations,
+            owner_references = [ scan_reference ],
         ),
         data={
             file_name: result_contents
@@ -59,19 +90,23 @@ def compress_results(contents):
 
 def main():
     """Main entrypoint"""
-    args = get_args()
-    if args.mode == 'incluster':
-        kubernetes.config.load_incluster_config()
-    elif args.mode == 'outcluster':
-        kubernetes.config.load_kube_config()
-    elif args.mode == 'debug':
-        # This will just print out the configmap
-        pass
-    else:
-        print(f"Invalid mode {args.mode}")
-        return 1
 
+    if 'KUBERNETES_PORT' in os.environ:
+        kubernetes.config.load_incluster_config()
+    else:
+        kubernetes.config.load_kube_config()
+
+    args = get_args()
     k8sv1api = kubernetes.client.CoreV1Api()
+
+    configuration = kubernetes.client.Configuration()
+    api_instance = kubernetes.client.CustomObjectsApi(kubernetes.client.ApiClient(configuration))
+    scan_instance = get_openscap_scan_instance(api_instance,
+                                               "example-openscap",
+                                               args.namespace)
+    if scan_instance == None:
+        print(f"Scan {scan_name} in namespace {namespace} does not exist")
+        return 0
 
     time_waited = 0
     while not os.path.exists(args.filename):
@@ -91,16 +126,15 @@ def main():
             compressed = True
             print("The results needs compressing")
 
-        confmap = create_config_map(args.config_map,
+        confmap = create_config_map(scan_instance,
+                                    args.config_map,
                                     "results",
                                     contents, compressed=compressed)
-        if args.mode == 'debug':
-            print(confmap)
-        else:
-            resp = k8sv1api.create_namespaced_config_map(
-                    body=confmap,
-                    namespace=args.namespace)
-            print("ConfigMap created: %s" % resp.metadata.name)
+        print(confmap)
+        resp = k8sv1api.create_namespaced_config_map(
+                body=confmap,
+                namespace=args.namespace)
+        print("ConfigMap created: %s" % resp.metadata.name)
     return 0
 
 if __name__ == "__main__":
