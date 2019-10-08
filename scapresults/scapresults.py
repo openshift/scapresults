@@ -102,7 +102,7 @@ def main():
     configuration = kubernetes.client.Configuration()
     api_instance = kubernetes.client.CustomObjectsApi(kubernetes.client.ApiClient(configuration))
     scan_instance = get_openscap_scan_instance(api_instance,
-                                               "example-openscap",
+                                               args.scan_name,
                                                args.namespace)
     if scan_instance == None:
         print(f"Scan {scan_name} in namespace {namespace} does not exist")
