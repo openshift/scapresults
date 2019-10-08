@@ -22,7 +22,7 @@ setuptools.setup(
     version="0.1.0",
     author="Jakub Hrozek",
     author_email="jhrozek@redhat.com",
-    description="A tool for generating SELinux security policies for k8s pods",
+    description="A tool that fetches OpenScap results from a container, to be used as a pod",
     license="GPLv3+",
     packages=["scapresults"],
     entry_points={
