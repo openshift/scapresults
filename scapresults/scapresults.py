@@ -108,7 +108,7 @@ def main():
                                                args.scan_name,
                                                args.namespace)
     if scan_instance == None:
-        print(f"Scan {scan_name} in namespace {namespace} does not exist")
+        print(f"Scan {args.scan_name} in namespace {args.namespace} does not exist")
         return 0
 
     time_waited = 0
