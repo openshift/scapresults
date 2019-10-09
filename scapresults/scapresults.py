@@ -31,6 +31,9 @@ def get_args():
     parser.add_argument(
         '--timeout', type=int, help='How long to wait for the file', dest='timeout',
         default=3600)
+    parser.add_argument(
+        '--compress', type=bool, help='Always compress the results', dest='compress',
+        default=False)
     return parser.parse_args()
 
 
@@ -121,7 +124,7 @@ def main():
         contents = result_file.read()
         compressed = False
 
-        if result_needs_compression(contents):
+        if result_needs_compression(contents) or args.compress:
             contents = compress_results(contents)
             compressed = True
             print("The results needs compressing")
