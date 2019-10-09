@@ -88,7 +88,7 @@ def compress_results(contents):
     # Encode the contents ascii, compress it with gzip, b64encode it so it
     # can be stored in the configmap, and finally pass the bytes to a UTF-8
     # python3 string.
-    return base64.b64encode(gzip.compress(contents.encode('ascii'))).decode()
+    return base64.b64encode(gzip.compress(contents))
 
 
 def main():
@@ -120,7 +120,7 @@ def main():
             return 1
 
     print(f"file {args.filename} found, will upload it")
-    with open(args.filename, 'r') as result_file:
+    with open(args.filename, 'rb') as result_file:
         contents = result_file.read()
         compressed = False
 
@@ -132,7 +132,8 @@ def main():
         confmap = create_config_map(scan_instance,
                                     args.config_map,
                                     "results",
-                                    contents, compressed=compressed)
+                                    contents.decode(),
+                                    compressed=compressed)
         print(confmap)
         resp = k8sv1api.create_namespaced_config_map(
                 body=confmap,
