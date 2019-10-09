@@ -72,7 +72,7 @@ def create_config_map(owner, name, file_name, result_contents, compressed=False)
         metadata=kubernetes.client.V1ObjectMeta(
             name=name,
             annotations=annotations,
-            owner_references = [ scan_reference ],
+            owner_references = [scan_reference],
         ),
         data={
             file_name: result_contents
@@ -107,7 +107,7 @@ def main():
     scan_instance = get_openscap_scan_instance(api_instance,
                                                args.scan_name,
                                                args.namespace)
-    if scan_instance == None:
+    if scan_instance is None:
         print(f"Scan {args.scan_name} in namespace {args.namespace} does not exist")
         return 0
 
