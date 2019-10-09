@@ -26,7 +26,8 @@ setuptools.setup(
     license="GPLv3+",
     packages=["scapresults"],
     entry_points={
-        'console_scripts': ['scapresults=scapresults.scapresults:main'],
+        'console_scripts': ['scapresults=scapresults.scapresults:main',
+                            'fetchresults=scapresults.fetchresults:main'],
     },
     classifiers=[
         "Programming Language :: Python :: 3",
