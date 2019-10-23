@@ -8,9 +8,10 @@ import gzip
 import kubernetes
 from kubernetes.client.rest import ApiException
 
-CRD_GROUP = "openscap.compliance.openshift.io"
+CRD_GROUP = "complianceoperator.compliance.openshift.io"
 CRD_API_VERSION = "v1alpha1"
-CRD_PLURALS = "openscaps"
+CRD_PLURALS = "compliancescans"
+
 
 COMPRESSED_ANNOTATION = "openscap-scan-result/compressed"
 
