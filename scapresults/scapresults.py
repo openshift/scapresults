@@ -9,9 +9,9 @@ import kubernetes
 from kubernetes.client.rest import ApiException
 
 # CRD definitions
-CRD_GROUP = "openscap.compliance.openshift.io"
+CRD_GROUP = "complianceoperator.compliance.openshift.io"
 CRD_API_VERSION = "v1alpha1"
-CRD_PLURALS = "openscaps"
+CRD_PLURALS = "compliancescans"
 
 def get_args():
     parser = argparse.ArgumentParser(description='Script watches for existence of a file'
@@ -20,7 +20,7 @@ def get_args():
         '--file', type=str, help='The file to watch', dest='filename',
         default=None, required=True)
     parser.add_argument(
-        '--owner', type=str, help='The openscap scan that owns the configMap objects', dest='scan_name',
+        '--owner', type=str, help='The compliance scan that owns the configMap objects', dest='scan_name',
         default=None, required=True)
     parser.add_argument(
         '--config-map-name', type=str, help='The configMap to upload to, typically the podname', dest='config_map',
