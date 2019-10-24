@@ -131,7 +131,7 @@ def main():
 
         confmap = create_config_map(scan_instance,
                                     args.config_map,
-                                    "results",
+                                    "results.html",
                                     contents.decode(),
                                     compressed=compressed)
         print(confmap)
