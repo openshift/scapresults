@@ -87,7 +87,7 @@ def write_map_results(maps, directory):
             if decompress:
                 value = decompress_results(value)
 
-            filename = m.metadata.name + '-' + key + '.html'
+            filename = m.metadata.name + '-' + key
             with open(os.path.join(directory, filename), 'w') as f:
                 f.write(value)
 
