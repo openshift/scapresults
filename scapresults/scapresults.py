@@ -73,6 +73,9 @@ def create_config_map(owner, name, file_name, result_contents, compressed=False)
             name=name,
             annotations=annotations,
             owner_references = [scan_reference],
+            labels={
+                "compliance-scan": owner['metadata']['name']
+            }
         ),
         data={
             file_name: result_contents
