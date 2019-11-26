@@ -1,21 +1,15 @@
-FROM fedora
+# Step one: build scapresults
+FROM registry.access.redhat.com/ubi8/go-toolset as builder
+
+COPY . .
+RUN make
+
+# Step two: containerize scapresults
+FROM registry.access.redhat.com/ubi8/ubi
 
 USER root
 
-# script dependencies
-RUN dnf -y install \
-        python3-kubernetes \
-    && rm -rf /var/cache/yum
-
 # build scapresults-k8s
-WORKDIR /tmp
-COPY scapresults/ scapresults/scapresults/
-COPY setup.py scapresults/
-WORKDIR /tmp/scapresults
-RUN python3 setup.py install
-WORKDIR /
-
-# Clean up
-RUN rm -rf /tmp/scapresults/
+COPY --from=builder /opt/app-root/src/scapresults /usr/local/bin/scapresults
 
 ENTRYPOINT ["/usr/local/bin/scapresults"]

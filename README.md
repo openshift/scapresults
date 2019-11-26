@@ -16,6 +16,4 @@ TODO
 - [ ] Handle duplicated ConfigMaps: What happens when the ConfigMap that this
   tool is trying to create already exists? Should it overwrite, ignore or fail?
 
-- [ ] Use UBI as a base, not fedora
-
 - [ ] Lock down the container
