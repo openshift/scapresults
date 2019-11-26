@@ -106,6 +106,7 @@ func waitForResultsFile(filename string, timeout int64) *os.File {
 				fmt.Println(err)
 				os.Exit(1)
 			}
+			time.Sleep(1 * time.Second)
 		}
 	}()
 
