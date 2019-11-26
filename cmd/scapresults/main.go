@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -96,10 +97,14 @@ func getOpenSCAPScanInstance(name, namespace string, dynclient dynamic.Interface
 
 func waitForResultsFile(filename string, timeout int64) *os.File {
 	readFileTimeoutChan := make(chan *os.File, 1)
+	// G304 (CWE-22) is addressed by this.
+	cleanFileName := filepath.Clean(filename)
 
 	go func() {
 		for {
-			file, err := os.Open(filename)
+			// Note that we're cleaning the filename path above.
+			// #nosec
+			file, err := os.Open(cleanFileName)
 			if err == nil {
 				fileinfo, err := file.Stat()
 				// Only try to use the file if it already has contents.
