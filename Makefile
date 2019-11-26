@@ -1,5 +1,5 @@
 GO=GO111MODULE=on go
-PKGS=$(shell go list ./... | grep -v -E '/vendor/|/test|/examples')
+PKGS=github.com/jhrozek/scapresults-k8s/cmd/scapresults
 
 all: build
 
@@ -20,7 +20,7 @@ mod-verify:
 
 .PHONY: gosec
 gosec:
-	@$(GO) run github.com/securego/gosec/cmd/gosec -severity medium -confidence medium -quiet ./...
+	@$(GO) run github.com/securego/gosec/cmd/gosec -severity medium -confidence medium -quiet $(PKGS)
 
 .PHONY: build
 build: fmt verify
