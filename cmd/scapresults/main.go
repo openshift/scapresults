@@ -101,7 +101,13 @@ func waitForResultsFile(filename string, timeout int64) *os.File {
 		for {
 			file, err := os.Open(filename)
 			if err == nil {
-				readFileTimeoutChan <- file
+				fileinfo, err := file.Stat()
+				// Only try to use the file if it already has contents.
+				// This way we avoid race conditions between the side-car and
+				// this script.
+				if err == nil && fileinfo.Size() > 0 {
+					readFileTimeoutChan <- file
+				}
 			} else if !os.IsNotExist(err) {
 				fmt.Println(err)
 				os.Exit(1)
