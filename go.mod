@@ -1,4 +1,4 @@
-module github.com/jhrozek/scapresults-k8s
+module github.com/openshift/scapresults
 
 go 1.13
 

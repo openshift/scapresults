@@ -1,5 +1,5 @@
 GO=GO111MODULE=on go
-PKGS=github.com/jhrozek/scapresults-k8s/cmd/scapresults
+PKGS=github.com/openshift/scapresults/cmd/scapresults
 
 all: build
 
@@ -28,4 +28,4 @@ build: fmt verify
 
 .PHONY: image
 image:
-	podman build -f Dockerfile -t scapresults-k8s:latest
+	podman build -f Dockerfile -t scapresults:latest

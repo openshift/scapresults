@@ -1,5 +1,5 @@
-scapresults-k8s
-===============
+scapresults
+===========
 
 This is deployed as a workload for the 
 [compliance-operator](https://github.com/openshift/compliance-operator/), and
