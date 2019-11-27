@@ -1,5 +1,5 @@
 GO=GO111MODULE=on go
-PKGS=github.com/jhrozek/scapresults-k8s/cmd/scapresults
+PKGS=github.com/openshift/scapresults/cmd/scapresults
 
 all: build
 
