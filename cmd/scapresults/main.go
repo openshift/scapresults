@@ -25,6 +25,7 @@ import (
 	"path/filepath"
 	"time"
 
+	backoff "github.com/cenkalti/backoff/v3"
 	"github.com/spf13/cobra"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -39,6 +40,7 @@ const (
 	crdGroup      = "complianceoperator.compliance.openshift.io"
 	crdAPIVersion = "v1alpha1"
 	crdPlurals    = "compliancescans"
+	maxRetries    = 15
 )
 
 type scapresultsConfig struct {
@@ -79,7 +81,7 @@ func getValidStringArg(cmd *cobra.Command, name string) string {
 	return val
 }
 
-func getOpenSCAPScanInstance(name, namespace string, dynclient dynamic.Interface) *unstructured.Unstructured {
+func getOpenSCAPScanInstance(name, namespace string, dynclient dynamic.Interface) (*unstructured.Unstructured, error) {
 	openscapScanRes := schema.GroupVersionResource{
 		Group:    crdGroup,
 		Version:  crdAPIVersion,
@@ -89,10 +91,10 @@ func getOpenSCAPScanInstance(name, namespace string, dynclient dynamic.Interface
 	openscapScan, err := dynclient.Resource(openscapScanRes).Namespace(namespace).Get(name, metav1.GetOptions{})
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
+		return nil, err
 	}
 
-	return openscapScan
+	return openscapScan, nil
 }
 
 func waitForResultsFile(filename string, timeout int64) *os.File {
@@ -205,8 +207,6 @@ func main() {
 				fmt.Println(err)
 				os.Exit(1)
 			}
-			openscapScan := getOpenSCAPScanInstance(scapresultsconf.ScanName, scapresultsconf.Namespace, dynclient)
-
 			file := waitForResultsFile(scapresultsconf.File, scapresultsconf.Timeout)
 			defer file.Close()
 
@@ -223,8 +223,16 @@ func main() {
 				fmt.Println("Needs compression.")
 			}
 
-			confMap := getConfigMap(openscapScan, scapresultsconf.ConfigMapName, "results", contents, compressed)
-			_, err = clientset.CoreV1().ConfigMaps(scapresultsconf.Namespace).Create(confMap)
+			err = backoff.Retry(func() error {
+				openscapScan, err := getOpenSCAPScanInstance(scapresultsconf.ScanName, scapresultsconf.Namespace, dynclient)
+				if err != nil {
+					return err
+				}
+				confMap := getConfigMap(openscapScan, scapresultsconf.ConfigMapName, "results", contents, compressed)
+				_, err = clientset.CoreV1().ConfigMaps(scapresultsconf.Namespace).Create(confMap)
+				return err
+			}, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), maxRetries))
+
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
