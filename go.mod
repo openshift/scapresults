@@ -3,6 +3,7 @@ module github.com/openshift/scapresults
 go 1.13
 
 require (
+	github.com/cenkalti/backoff/v3 v3.1.1
 	github.com/gorilla/mux v1.7.3 // indirect
 	github.com/hashicorp/consul/api v1.3.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
