@@ -1,4 +1,4 @@
-GO=GO111MODULE=on go
+GO=GOFLAGS=-mod=vendor GO111MODULE=auto go
 PKGS=github.com/openshift/scapresults/cmd/scapresults
 APP_NAME=scapresults
 NAMESPACE?=openshift-compliance
@@ -35,8 +35,8 @@ gosec:
 	@$(GO) run github.com/securego/gosec/cmd/gosec -severity medium -confidence medium -quiet $(PKGS)
 
 .PHONY: build
-build: fmt verify
-	@$(GO) build -o scapresults cmd/scapresults/main.go
+build:
+	$(GO) build -o scapresults cmd/scapresults/main.go
 
 .PHONY: image
 image:
