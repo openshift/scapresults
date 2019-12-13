@@ -1,6 +1,7 @@
 # Step one: build scapresults
 FROM registry.access.redhat.com/ubi8/go-toolset as builder
 
+ENV GOFLAGS=-mod=vendor
 COPY . .
 RUN make
 
