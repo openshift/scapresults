@@ -1,3 +1,11 @@
+DEPRECATED
+==========
+This project has been [moved](https://github.com/openshift/compliance-operator/pull/83) under the [compliance-operator](https://github.com/openshift/compliance-operator)
+
+Please consult compliance-operator for latest development.
+
+___
+
 scapresults
 ===========
 
