@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/cenkalti/backoff/v3 v3.1.1
+	github.com/dsnet/compress v0.0.1
 	github.com/securego/gosec v0.0.0-20191119104125-df484bfa9e9f
 	github.com/spf13/cobra v0.0.5
 	golang.org/x/sys v0.0.0-20191120155948-bd437916bb0e // indirect
